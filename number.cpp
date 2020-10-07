@@ -119,3 +119,71 @@ std::ostream& operator<<(std::ostream& out, Integer number) {
   }
   return out;
 }
+
+Decimal& Decimal::operator+=(Decimal const& other) {
+  _numerator =
+      other._numerator * _denominator + _numerator * other._denominator;
+  _denominator *= other._denominator;
+  return *this;
+}
+
+Integer& Integer::operator*=(Integer const& o) {
+  std::vector<uint64_t> product;
+  product.resize(_digits.size() + o._digits.size(), 0);
+  for (std::size_t b = 0; b < o._digits.size(); ++b) {
+    Digit carry = 0;
+    for (std::size_t a = 0; a < _digits.size(); ++a) {
+      product[a + b - 1] += carry + _digits[a] * o._digits[b];
+      carry = product[a + b - 1] / Base;
+      product[a + b - 1] = product[a + b - 1] % Base;
+    }
+    product[b + _digits.size() - 1] = carry;
+  }
+  // Copy product
+  _digits.clear();
+  for (std::size_t i = 0; i < product.size(); ++i) {
+    _digits.push_back(product[i]);
+  }
+  // Trim zeros
+
+  return *this;
+}
+
+Integer operator*(Integer left, Integer const& right) {
+  left *= right;
+  return left;
+}
+
+std::ostream& operator<<(std::ostream& out, Complex const& number) {
+  out << number.real() << " + i" << number.img();
+  return out;
+}
+
+std::istream& operator>>(std::istream& theStream, Integer& theNumber) {
+  int entier;
+  theStream >> entier;
+  theNumber = Integer(entier);
+  return theStream;
+}
+
+Complex& Complex::operator+=(Complex const& other) {
+  _real += other._real;
+  _img += other._img;
+  return *this;
+}
+
+Complex operator+(Complex left, Complex const& right) {
+  left += right;
+  return left;
+}
+
+std::istream& operator>>(std::istream& out, Complex& number) {
+  out >> number._real >> number._img;
+  return out;
+}
+
+std::string polar(Complex const& n) {
+  std::stringstream ss;
+  ss << "(" << n.real() << ", " << n.img() << ")";
+  return ss.str();
+}
